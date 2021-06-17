@@ -1,0 +1,9 @@
+cfil.AddAdmin(tg, {from:a})
+
+sfil.AddAdmin(tg, {from:a})
+
+debugcrosslend.AddAdmin(tg, {from:a})
+
+cfil.mint(tg, 1e24, "", {from:a})
+
+crfi.send(tg, 1e24, "", {from:a})
