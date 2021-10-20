@@ -480,6 +480,7 @@ contract cfilAllswap {
         uint256 Crfilnum;
         bool isentry;
         uint256 hadwithdraw;
+        bool isout;
         }
 
     struct IssueInfoNotLimit {  
@@ -516,9 +517,9 @@ contract cfilAllswap {
 
 
     address public governance;
-    IERC20 public CRFIL = IERC20(0xacd6012077c1DD95bC4561A0e566D16080b10698);  // CRFIL token CRFIL地址
+    IERC20 public CRFIL = IERC20(0xAE20BC46300BAb5d85612C6BC6EA87eA0F186035);  // CRFIL token CRFIL地址
     
-    IERC20 public CFIL = IERC20(0xd6C0Ea77bCFb756A36ca1746a7f0e4Cb927bC43B);  // CFIL token  DFIL地址
+    IERC20 public CFIL = IERC20(0x4eab1d37213B08C224E4C9C28efbA23DC493dFD2);  // CFIL token  DFIL地址
         
      event SetIssueInfoNumberNotLimit(uint256 number, uint256 totalCfil,uint256 ratio, uint256 fee,uint256 starttime,
          uint256 endtime);
@@ -678,14 +679,17 @@ contract cfilAllswap {
         }
     }
 
-    function getCRFILfee(uint number  ) public {
+    function getCRFILfee(uint number ,bool islimit  ) public {
         //require(governance == msg.sender, "not governance");
         require(owners[msg.sender], "!owners");
-        require(IssueInfoMapNotLimit[number].endtime<block.timestamp, "no end");
-        uint re= IssueInfoMapNotLimit[number].swapoutCfil.mul(IssueInfoMapNotLimit[number].ratio).mul(
+        if (islimit) {
+        } else {
+            require(IssueInfoMapNotLimit[number].endtime<block.timestamp, "no end");
+            uint re= IssueInfoMapNotLimit[number].swapoutCfil.mul(IssueInfoMapNotLimit[number].ratio).mul(
                 IssueInfoMapNotLimit[number].fee).div(1000);
             IssueInfoMapNotLimit[number].fee=0;
-            CRFIL.transfer(msg.sender, re);    
+            CRFIL.transfer(msg.sender, re);
+        }
     }
     
     function getCFIL(uint number ,bool islimit) public {
@@ -796,7 +800,10 @@ contract cfilAllswap {
          
         // require(amount.div(20) <= IssueInfoMapNotLimit[onenumber].userlimit, "out user limit");
          require(IssueInfoMapNotLimit[onenumber].users[msg.sender].isentry == true, "not swap" );
-        require(IssueInfoMapNotLimit[onenumber].users[msg.sender].hadwithdraw == 0, "had swap" );
+        //require(IssueInfoMapNotLimit[onenumber].users[msg.sender].hadwithdraw == 0, "had swap" );
+        require(IssueInfoMapNotLimit[onenumber].users[msg.sender].isout == false, "had swap" );
+        IssueInfoMapNotLimit[onenumber].users[msg.sender].isout = true;
+        
         uint256 ratio= IssueInfoMapNotLimit[onenumber].ratio;
          uint256 fee= IssueInfoMapNotLimit[onenumber].fee;
          uint256 totalDepoistCfil = IssueInfoMapNotLimit[onenumber].totalDepoistCrfil.div(ratio);
@@ -853,7 +860,11 @@ contract cfilAllswap {
          require( IssueInfoMapLimit[onenumber].endtime <  block.timestamp, "had  end");
 
          require(IssueInfoMapLimit[onenumber].users[msg.sender].isentry == true, "not swap" );
-        require(IssueInfoMapLimit[onenumber].users[msg.sender].hadwithdraw == 0, "had swap" );
+        //require(IssueInfoMapLimit[onenumber].users[msg.sender].hadwithdraw == 0, "had swap" );
+        require(IssueInfoMapLimit[onenumber].users[msg.sender].isout == false, "had swap" );
+
+        IssueInfoMapLimit[onenumber].users[msg.sender].isout = true;
+        
         uint256 ratio= IssueInfoMapLimit[onenumber].ratio;
          //uint256 fee= IssueInfoMapLimit[onenumber].fee;
          uint256 totalDepoistCfil = IssueInfoMapLimit[onenumber].totalDepoistCrfil.div(ratio);
