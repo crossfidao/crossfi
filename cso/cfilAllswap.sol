@@ -647,9 +647,9 @@ contract cfilAllswap {
        address useraddress,
         uint256 Crfilnum,
         bool isentry,
-        uint256 hadwithdraw) {
+        bool isout) {
             User storage info= IssueInfoMapNotLimit[onenumber].users[user];
-            return (info.useraddress, info.Crfilnum, info.isentry, info.hadwithdraw);
+            return (info.useraddress, info.Crfilnum, info.isentry, info.isout);
             
         }
 
@@ -657,22 +657,24 @@ contract cfilAllswap {
        address useraddress,
         uint256 Crfilnum,
         bool isentry,
-        uint256 hadwithdraw) {
+         bool isout) {
             User storage info= IssueInfoMapLimit[onenumber].users[user];
-            return (info.useraddress, info.Crfilnum, info.isentry, info.hadwithdraw);
+            return (info.useraddress, info.Crfilnum, info.isentry, info.isout);
             
         }
 
-    
+    uint256 public days3 = 3 days;
     function getCRFIL(uint number ,bool islimit  ) public {
         //require(governance == msg.sender, "not governance");
         require(owners[msg.sender], "!owners");
         if (islimit) {
-            require(IssueInfoMapLimit[number].endtime<block.timestamp, "no end");
+            //require(IssueInfoMapLimit[number].endtime<block.timestamp, "no end");
+            require(IssueInfoMapLimit[number].endtime.add(days3)<block.timestamp, "need end over 3 days");
+
             uint re2= IssueInfoMapLimit[number].swapoutCfil.mul(IssueInfoMapLimit[number].ratio);
             CRFIL.transfer(msg.sender, re2);
         } else {
-            require(IssueInfoMapNotLimit[number].endtime<block.timestamp, "no end");
+            require(IssueInfoMapNotLimit[number].endtime.add(days3)<block.timestamp, "need end over 3 days");
             uint re= IssueInfoMapNotLimit[number].swapoutCfil.mul(IssueInfoMapNotLimit[number].ratio);
            // IssueInfoMapNotLimit[number].fee=0;
             CRFIL.transfer(msg.sender, re);
@@ -684,7 +686,7 @@ contract cfilAllswap {
         require(owners[msg.sender], "!owners");
         if (islimit) {
         } else {
-            require(IssueInfoMapNotLimit[number].endtime<block.timestamp, "no end");
+            require(IssueInfoMapNotLimit[number].endtime.add(days3)<block.timestamp, "need end over 3 days");
             uint re= IssueInfoMapNotLimit[number].swapoutCfil.mul(IssueInfoMapNotLimit[number].ratio).mul(
                 IssueInfoMapNotLimit[number].fee).div(1000);
             IssueInfoMapNotLimit[number].fee=0;
@@ -697,12 +699,12 @@ contract cfilAllswap {
         require(owners[msg.sender], "!owners");
         if (islimit) {
            // IssueInfoMapLimit[number]
-            require(IssueInfoMapLimit[number].endtime<block.timestamp, "no end");
+            require(IssueInfoMapLimit[number].endtime.add(days3)<block.timestamp, "need end over 3 days");
             uint256 re= IssueInfoMapLimit[number].totalCfil.sub(IssueInfoMapLimit[number].swapoutCfil);
             IssueInfoMapLimit[number].swapoutCfil=IssueInfoMapLimit[number].totalCfil;
             CFIL.transfer(msg.sender, re);
         } else {
-            require(IssueInfoMapNotLimit[number].endtime<block.timestamp, "no end");
+            require(IssueInfoMapNotLimit[number].endtime.add(days3)<block.timestamp, "need end over 3 days");
             uint256 re= IssueInfoMapNotLimit[number].totalCfil.sub(IssueInfoMapNotLimit[number].swapoutCfil);
             IssueInfoMapNotLimit[number].swapoutCfil=IssueInfoMapNotLimit[number].totalCfil;
             CFIL.transfer(msg.sender, re);
